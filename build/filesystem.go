@@ -99,6 +99,9 @@ func HasMewnReference(filename string) (bool, error) {
 		if imprt.Path.Value == `"github.com/sohaha/zzz/lib/static"` {
 			return true, nil
 		}
+		if imprt.Path.Value == `"github.com/sohaha/zstatic"` {
+			return true, nil
+		}
 	}
 	return false, nil
 }
