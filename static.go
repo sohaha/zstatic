@@ -110,11 +110,8 @@ func NewFileserver(dir string, fn ...func(ctype string, content []byte, err erro
 			c.String(404, err.Error())
 			return
 		}
-		c.SetContent(&znet.PrevData{
-			Code:    http.StatusOK,
-			Type:    ctype,
-			Content: content,
-		})
+		c.SetContentType(ctype)
+		c.Byte(http.StatusOK,content)
 
 	}
 }
