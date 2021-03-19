@@ -2,11 +2,11 @@ package build
 
 import (
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 	"reflect"
 
 	"github.com/pkg/errors"
+	"github.com/sohaha/zlsgo/zfile"
 	"github.com/sohaha/zlsgo/zstring"
 	// "runtime"
 )
@@ -103,7 +103,7 @@ func (f *FileGroup) loadAsset(filename string) (contents []byte, err error) {
 	fullFilePath := filepath.Join(f.baseDirectory, filename)
 	// fullFilePath := filepath.Join(callerDir, f.baseDirectory, filename)
 
-	contents, err = ioutil.ReadFile(fullFilePath)
+	contents, err = zfile.ReadFile(fullFilePath)
 	if err != nil {
 		err = errors.Errorf("The asset '%s' was not found!", filename)
 	}
