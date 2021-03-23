@@ -1,13 +1,14 @@
 package zstatic
 
 import (
+	"html/template"
 	"mime"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/sohaha/zlsgo/zlog"
 	"github.com/sohaha/zlsgo/znet"
-
 	"github.com/sohaha/zstatic/build"
 )
 
@@ -110,8 +111,58 @@ func NewFileserver(dir string, fn ...func(ctype string, content []byte, err erro
 			c.String(404, err.Error())
 			return
 		}
+		c.Byte(http.StatusOK, content)
 		c.SetContentType(ctype)
-		c.Byte(http.StatusOK,content)
-
 	}
+}
+
+func LoadTemplate(pattern string) (t *template.Template, err error) {
+	t = template.New("")
+
+	var templateData *build.FileGroup
+	templateData, err = Group(pattern)
+	if err != nil {
+		return nil, err
+	}
+	all := templateData.All()
+	if !strings.HasSuffix(pattern, "/") {
+		pattern = pattern + "/"
+	}
+	if len(all) > 0 {
+		for name := range all {
+			if !strings.HasSuffix(name, ".html") {
+				continue
+			}
+			t, err = t.New(pattern + name).Parse(templateData.String(name))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	// if len(all) == 0 {
+	// 	dir := zfile.RealPath(templateData.GetBaseDir(), true)
+	// 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	// 		if d.IsDir() {
+	// 			return nil
+	// 		}
+	// 		path = zfile.RealPath(path)
+	// 		name := strings.Replace(path, dir, "", 1)
+	// 		bytes, _ := zfile.ReadFile(path)
+	// 		return templateData.AddByteAsset(name, bytes)
+	// 	})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	all = templateData.All()
+	// }
+	// for name, asset := range all {
+	// 	if !strings.HasSuffix(name, ".html") {
+	// 		continue
+	// 	}
+	// 	t, err = t.New(name).Parse(zstring.Bytes2String(asset))
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
+	return t, nil
 }
