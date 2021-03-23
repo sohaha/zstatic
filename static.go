@@ -1,13 +1,15 @@
 package zstatic
 
 import (
+	"html/template"
 	"mime"
 	"net/http"
 	"path/filepath"
-
+	
+	"github.com/sohaha/zlsgo/zfile"
 	"github.com/sohaha/zlsgo/zlog"
 	"github.com/sohaha/zlsgo/znet"
-
+	"github.com/sohaha/zlsgo/zstring"
 	"github.com/sohaha/zstatic/build"
 )
 
@@ -110,8 +112,43 @@ func NewFileserver(dir string, fn ...func(ctype string, content []byte, err erro
 			c.String(404, err.Error())
 			return
 		}
+		c.Byte(http.StatusOK, content)
 		c.SetContentType(ctype)
-		c.Byte(http.StatusOK,content)
-
 	}
+}
+
+func LoadTemplate(pattern string) (t *template.Template, err error) {
+	t = template.New("")
+
+	var templateData *build.FileGroup
+	templateData, err = Group(pattern)
+	if err != nil {
+		return nil, err
+	}
+
+	all := templateData.All()
+
+	if len(all) == 0 {
+		files, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range files {
+			name := filepath.Base(file)
+			bytes, _ := zfile.ReadFile(file)
+			t, err = t.New(name).Parse(zstring.Bytes2String(bytes))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	for file := range all {
+		name := filepath.Base(file)
+		t, err = t.New(name).Parse(templateData.String(file))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return t, nil
 }

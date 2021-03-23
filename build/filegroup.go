@@ -105,7 +105,7 @@ func (f *FileGroup) loadAsset(filename string) (contents []byte, err error) {
 
 	contents, err = zfile.ReadFile(fullFilePath)
 	if err != nil {
-		err = errors.Errorf("The asset '%s' was not found!", filename)
+		err = errors.Errorf("The asset '%s' was not found", filename)
 	}
 	return
 }
