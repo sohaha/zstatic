@@ -5,7 +5,7 @@ import (
 	"mime"
 	"net/http"
 	"path/filepath"
-	
+
 	"github.com/sohaha/zlsgo/zfile"
 	"github.com/sohaha/zlsgo/zlog"
 	"github.com/sohaha/zlsgo/znet"
@@ -94,6 +94,11 @@ func Group(name string) (result *build.FileGroup, err error) {
 }
 
 func NewFileserver(dir string, fn ...func(ctype string, content []byte, err error)) func(c *znet.Context) {
+	f, _ := NewFileserverAndGroup(dir, fn...)
+	return f
+}
+
+func NewFileserverAndGroup(dir string, fn ...func(ctype string, content []byte, err error)) (func(c *znet.Context), *build.FileGroup) {
 	const defFile = "index.html"
 	f, _ := Group(dir)
 	isCb := len(fn) > 0
@@ -114,7 +119,7 @@ func NewFileserver(dir string, fn ...func(ctype string, content []byte, err erro
 		}
 		c.Byte(http.StatusOK, content)
 		c.SetContentType(ctype)
-	}
+	}, f
 }
 
 func LoadTemplate(pattern string) (t *template.Template, err error) {
