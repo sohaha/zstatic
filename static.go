@@ -2,7 +2,6 @@ package zstatic
 
 import (
 	"html/template"
-	"mime"
 	"net/http"
 	"path/filepath"
 
@@ -93,32 +92,32 @@ func Group(name string) (result *build.FileGroup, err error) {
 	return
 }
 
-func NewFileserver(dir string, fn ...func(ctype string, content []byte, err error)) func(c *znet.Context) {
-	f, _ := NewFileserverAndGroup(dir, fn...)
+func NewFileserver(dir string, handle ...func(c *znet.Context, name string, content []byte, err error) bool) func(c *znet.Context) {
+	f, _ := NewFileserverAndGroup(dir, handle...)
 	return f
 }
 
-func NewFileserverAndGroup(dir string, fn ...func(ctype string, content []byte, err error)) (func(c *znet.Context), *build.FileGroup) {
+func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name string, content []byte, err error) bool) (func(c *znet.Context), *build.FileGroup) {
 	const defFile = "index.html"
 	f, _ := Group(dir)
-	isCb := len(fn) > 0
 	return func(c *znet.Context) {
 		name := c.GetParam("file")
 		if name == "" {
 			name = defFile
 		}
 		content, err := f.MustBytes(name)
-		ctype := mime.TypeByExtension(filepath.Ext(name))
-		if isCb {
-			fn[0](ctype, content, err)
-			return
+		mime := zfile.GetMimeType(name, content)
+		c.SetContentType(mime)
+		if len(handle) > 0 && handle[0] != nil {
+			if handle[0](c, name, content, err) {
+				return
+			}
 		}
 		if err != nil {
 			c.String(404, err.Error())
 			return
 		}
 		c.Byte(http.StatusOK, content)
-		c.SetContentType(ctype)
 	}, f
 }
 

@@ -5,10 +5,8 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/pkg/errors"
 	"github.com/sohaha/zlsgo/zfile"
 	"github.com/sohaha/zlsgo/zstring"
-	// "runtime"
 )
 
 // FileGroup holds a collection of files
@@ -105,7 +103,7 @@ func (f *FileGroup) loadAsset(filename string) (contents []byte, err error) {
 
 	contents, err = zfile.ReadFile(fullFilePath)
 	if err != nil {
-		err = errors.Errorf("The asset '%s' was not found", filename)
+		err = fmt.Errorf("The asset '%s' was not found", filename)
 	}
 	return
 }
