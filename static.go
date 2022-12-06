@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/sohaha/zlsgo/zfile"
 	"github.com/sohaha/zlsgo/zlog"
@@ -91,7 +92,24 @@ func Group(name string) (result *build.FileGroup, err error) {
 	}
 	return
 }
+func Group2(name string) (result *build.FileGroup, err error) {
+	result = mainAssetDirectory.GetGroup(name)
+	if result == nil {
+		result, err = mainAssetDirectory.NewFileGroup(name)
+	}
+	return
+}
 
+func Group3(name, s string) (result *build.FileGroup, err error) {
+	result = mainAssetDirectory.GetGroup(name)
+	if result == nil {
+		result, err = mainAssetDirectory.NewFileGroup(name)
+	}
+	return
+}
+func NewFileserver2(dir string, handle ...func(c *znet.Context, name string, content []byte, err error) bool) string {
+	return ""
+}
 func NewFileserver(dir string, handle ...func(c *znet.Context, name string, content []byte, err error) bool) func(c *znet.Context) {
 	f, _ := NewFileserverAndGroup(dir, handle...)
 	return f
@@ -104,6 +122,8 @@ func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name stri
 		name := c.GetParam("file")
 		if name == "" {
 			name = defFile
+		} else {
+			name = strings.TrimPrefix(name, "/")
 		}
 		content, err := f.MustBytes(name)
 		mime := zfile.GetMimeType(name, content)
