@@ -92,24 +92,7 @@ func Group(name string) (result *build.FileGroup, err error) {
 	}
 	return
 }
-func Group2(name string) (result *build.FileGroup, err error) {
-	result = mainAssetDirectory.GetGroup(name)
-	if result == nil {
-		result, err = mainAssetDirectory.NewFileGroup(name)
-	}
-	return
-}
 
-func Group3(name, s string) (result *build.FileGroup, err error) {
-	result = mainAssetDirectory.GetGroup(name)
-	if result == nil {
-		result, err = mainAssetDirectory.NewFileGroup(name)
-	}
-	return
-}
-func NewFileserver2(dir string, handle ...func(c *znet.Context, name string, content []byte, err error) bool) string {
-	return ""
-}
 func NewFileserver(dir string, handle ...func(c *znet.Context, name string, content []byte, err error) bool) func(c *znet.Context) {
 	f, _ := NewFileserverAndGroup(dir, handle...)
 	return f
