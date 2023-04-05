@@ -26,10 +26,6 @@ func NewFS(pattern string) (*FS, error) {
 	return &FS{g: g}, nil
 }
 
-func (f *FS) String(name string) string {
-	return f.g.String(name)
-}
-
 func (f *FS) Open(name string) (http.File, error) {
 	b, err := f.g.MustBytes(strings.TrimPrefix(name, "/"))
 	if err != nil {
