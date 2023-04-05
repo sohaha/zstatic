@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sohaha/zstatic/build"
@@ -30,7 +31,7 @@ func (f *FS) String(name string) string {
 }
 
 func (f *FS) Open(name string) (http.File, error) {
-	b, err := f.g.MustBytes(name)
+	b, err := f.g.MustBytes(strings.TrimPrefix(name, "/"))
 	if err != nil {
 		return nil, err
 	}
