@@ -3,6 +3,7 @@ package zstatic
 import (
 	"html/template"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -104,6 +105,15 @@ func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name stri
 	return func(c *znet.Context) {
 		name := c.GetParam("file")
 		if name == "" {
+			u, _ := url.Parse(c.Request.URL.String())
+			redirect := u.Path + "/"
+			if u.RawQuery != "" {
+				redirect = redirect + "?" + u.RawQuery
+			}
+
+			c.Redirect(redirect)
+			return
+		} else if name == "/" {
 			name = defFile
 		} else {
 			name = strings.TrimPrefix(name, "/")
