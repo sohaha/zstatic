@@ -114,7 +114,7 @@ func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name stri
 			}
 		}
 
-		if name == "/" {
+		if name == "/" || name == "" {
 			name = defFile
 		}
 
