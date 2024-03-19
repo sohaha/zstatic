@@ -124,7 +124,8 @@ func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name stri
 		}
 
 		mime := zfile.GetMimeType(name, content)
-		c.SetContentType(mime)
+		c.SetHeader("Content-Type", "")
+		c.SetHeader("Content-Type", mime)
 		if len(handle) > 0 && handle[0] != nil {
 			if handle[0](c, name, content, err) {
 				return
