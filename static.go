@@ -3,7 +3,6 @@ package zstatic
 import (
 	"html/template"
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -104,21 +103,26 @@ func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name stri
 	f, _ := Group(dir)
 	return func(c *znet.Context) {
 		name := c.GetParam("file")
-		if name == "" {
-			u, _ := url.Parse(c.Request.URL.String())
-			redirect := u.Path + "/"
-			if u.RawQuery != "" {
-				redirect = redirect + "?" + u.RawQuery
-			}
-
-			c.Redirect(redirect)
-			return
-		} else if name == "/" {
-			name = defFile
-		} else {
+		nameNil := name == ""
+		if !nameNil {
 			name = strings.TrimPrefix(name, "/")
+		} else if nameNil {
+			name = c.Request.URL.Path
+			c.Next()
+			if c.PrevContent().Code.Load() != int32(404) && c.PrevContent().Code.Load() != int32(0) {
+				return
+			}
 		}
+
+		if name == "/" {
+			name = defFile
+		}
+
 		content, err := f.MustBytes(name)
+		if err != nil && nameNil {
+			return
+		}
+
 		mime := zfile.GetMimeType(name, content)
 		c.SetContentType(mime)
 		if len(handle) > 0 && handle[0] != nil {
@@ -126,6 +130,7 @@ func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name stri
 				return
 			}
 		}
+
 		if err != nil {
 			c.String(404, err.Error())
 			return
