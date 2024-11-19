@@ -22,7 +22,7 @@ func init() {
 
 // CompressFile reads the given file and converts it to a gzip compressed hex string
 func CompressFile(filename string) ([]byte, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := zfile.ReadFile(filename)
 	if err != nil {
 		return []byte{}, err
 	}

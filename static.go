@@ -14,9 +14,11 @@ import (
 )
 
 // mainAssetDirectory stores all the assets
-var mainAssetDirectory = build.NewAssetDirectory()
-var rootFileGroup *build.FileGroup
-var err error
+var (
+	mainAssetDirectory = build.NewAssetDirectory()
+	rootFileGroup      *build.FileGroup
+	err                error
+)
 
 func init() {
 	rootFileGroup, err = mainAssetDirectory.NewFileGroup(".")
@@ -143,6 +145,7 @@ func NewFileserverAndGroup(dir string, handle ...func(c *znet.Context, name stri
 func LoadTemplate(pattern string) (t *template.Template, err error) {
 	t = template.New("")
 
+	pattern = strings.TrimRight(pattern, "/")
 	var templateData *build.FileGroup
 	templateData, err = Group(pattern)
 	if err != nil {
@@ -152,16 +155,15 @@ func LoadTemplate(pattern string) (t *template.Template, err error) {
 	all := templateData.All()
 
 	if len(all) == 0 {
-		files, err := filepath.Glob(pattern)
-		if err != nil {
-			return nil, err
-		}
-		for _, file := range files {
-			name := filepath.Base(file)
-			bytes, _ := zfile.ReadFile(file)
-			t, err = t.New(name).Parse(zstring.Bytes2String(bytes))
-			if err != nil {
-				return nil, err
+		files, err := filepath.Glob(pattern + "/*")
+		if err == nil {
+			for _, file := range files {
+				name := filepath.Base(file)
+				bytes, _ := zfile.ReadFile(file)
+				t, err = t.New(name).Parse(zstring.Bytes2String(bytes))
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
